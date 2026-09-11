@@ -1,64 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="CyberPortalHub multilingual real-time translator">
-  <title>Translator | CyberPortalHub</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b10">
+<meta name="description" content="CyberPortalHub multilingual real-time translator">
+<title>Translator | CyberPortalHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <header class="topbar">
-  <div class="brand"><span class="logo">C</span><div><b>CYBERPORTALHUB</b><small>Cyber Investigation • Security Tools</small></div></div>
+  <div class="brand">
+    <span class="logo">C</span>
+    <div>
+      <b>CyberPortalHub</b>
+      <small>Cyber Investigation &amp; Security Tools</small>
+    </div>
+  </div>
 </header>
 
 <main class="wrap">
+
   <section class="hero">
-    <div>
-      <p class="eyebrow">LANGUAGE TOOL</p>
-      <h1>AI-Ready Translator</h1>
-      <p class="sub">Fast multilingual translation with real-time typing, voice input and speech output.</p>
+    <div class="hero-text">
+      <h1>Translator</h1>
+      <p class="sub">Type, paste or speak, and watch the translation resolve as you go &mdash; across 50 languages.</p>
+      <div class="pills">
+        <span class="pill">50+ languages</span>
+        <span class="pill">Auto-detect source</span>
+      </div>
     </div>
-    <span class="badge">GitHub Pages Edition</span>
+    <div class="signal" aria-hidden="true">
+      <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+    </div>
   </section>
 
-  <section class="toolbar card">
-    <select id="source"></select>
-    <button id="swap" class="iconbtn" title="Swap languages">⇄</button>
-    <select id="target"></select>
-    <label class="toggle"><input id="realtime" type="checkbox" checked><span></span> Real-time</label>
+  <section class="console card">
+    <div class="langfield">
+      <label for="source">Source language</label>
+      <select id="source"></select>
+    </div>
+    <button id="swap" class="iconbtn" title="Swap languages" aria-label="Swap languages">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg>
+    </button>
+    <div class="langfield">
+      <label for="target">Target language</label>
+      <select id="target"></select>
+    </div>
+    <label class="toggle">
+      <input id="realtime" type="checkbox" checked>
+      <span></span>
+      Live translate
+    </label>
   </section>
 
   <section class="grid">
-    <div class="card panel">
-      <div class="panelhead"><span>Input</span><span id="detected">Auto detect</span></div>
-      <textarea id="input" maxlength="5000" placeholder="Type or speak text here..."></textarea>
+    <div class="card panel panel-in">
+      <div class="panelhead">
+        <span>Input</span>
+        <span id="detected" class="mono">Auto detect</span>
+      </div>
+      <textarea id="input" placeholder="Type or speak text here&hellip;" aria-label="Text to translate"></textarea>
       <div class="actions">
-        <button id="mic" class="secondary">🎙 Voice</button>
-        <button id="clear" class="secondary">Clear</button>
-        <span id="count">0 / 5000</span>
+        <button id="mic" class="secondary" aria-label="Voice input">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>
+          Voice
+        </button>
+        <button id="clear" class="secondary" aria-label="Clear input">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          Clear
+        </button>
+        <span id="count" class="mono">0 characters</span>
       </div>
     </div>
 
-    <div class="card panel">
-      <div class="panelhead"><span>Translation</span><span id="status">Ready</span></div>
-      <textarea id="output" readonly placeholder="Translation will appear here..."></textarea>
+    <div class="connector" aria-hidden="true">
+      <div class="dot"></div>
+    </div>
+
+    <div class="card panel panel-out">
+      <div class="panelhead">
+        <span>Translation</span>
+        <span id="status" class="mono" aria-live="polite">Ready</span>
+      </div>
+      <textarea id="output" readonly placeholder="Translation will appear here&hellip;" aria-label="Translated text"></textarea>
       <div class="actions">
-        <button id="speak" class="secondary">🔊 Speak</button>
-        <button id="copy" class="secondary">Copy</button>
-        <button id="download" class="secondary">Download</button>
+        <button id="speak" class="secondary" aria-label="Speak translation">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/></svg>
+          Speak
+        </button>
+        <button id="copy" class="secondary" aria-label="Copy translation">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+          Copy
+        </button>
+        <button id="download" class="secondary" aria-label="Download translation">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 21h16"/></svg>
+          Download
+        </button>
       </div>
     </div>
   </section>
 
   <section class="notice card">
-    <b>GitHub Pages note</b>
-    <p>This public frontend is configured to use a demo translation provider. Do not place a Gemini/API secret in this repository. For production-quality Gemini translation, connect this UI to the secure Python backend.</p>
+    <b>GitHub Pages build</b>
+    <p>This public frontend uses a demo translation provider &mdash; no Gemini or other API secret lives in this repository. For production-quality AI translation, point this UI at the secure Python backend so the key stays server-side.</p>
   </section>
+
 </main>
 
-<footer>© CyberPortalHub • Independent reference & tools website</footer>
+<footer>CyberPortalHub &mdash; independent reference &amp; tools website</footer>
+
 <script src="translator.js"></script>
 </body>
 </html>
