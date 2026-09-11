@@ -147,25 +147,59 @@ $("speak").onclick=()=>{
   speechSynthesis.speak(new SpeechSynthesisUtterance(output.value));
 };
 
-let recognition;
+let recognition=null, recognizing=false, baseText="", finalizedText="";
+
+function buildLiveText(interim){
+  let out=baseText;
+  if(finalizedText) out+= (out?" ":"")+finalizedText;
+  if(interim) out+= (out?" ":"")+interim;
+  return out;
+}
+
 $("mic").onclick=()=>{
   if(!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)){
     alert("Voice input is not supported in this browser.");
     return;
   }
+  if(recognizing){
+    recognition.stop(); // user tapped again to stop manually
+    return;
+  }
   const R=window.SpeechRecognition||window.webkitSpeechRecognition;
   recognition=new R();
-  recognition.continuous=false;
+  recognition.continuous=true;     // keep listening through pauses instead of stopping after one phrase
   recognition.interimResults=true;
   recognition.lang=source.value==="auto"?"en-IN":source.value;
-  recognition.onstart=()=>setStatus("Listening\u2026");
+
+  baseText=input.value.trim();     // preserve whatever was already there
+  finalizedText="";
+
+  recognition.onstart=()=>{
+    recognizing=true;
+    $("mic").classList.add("recording");
+    setStatus("Listening\u2026");
+  };
   recognition.onresult=e=>{
-    let s="";
-    for(let i=e.resultIndex;i<e.results.length;i++) s+=e.results[i][0].transcript;
-    input.value=s; updateCount(); schedule();
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const transcript=e.results[i][0].transcript;
+      if(e.results[i].isFinal){
+        finalizedText+=(finalizedText?" ":"")+transcript.trim(); // keep confirmed speech, never overwrite it
+      }else{
+        interim+=transcript; // live preview of the phrase still being spoken
+      }
+    }
+    input.value=buildLiveText(interim);
+    updateCount();
+    schedule();
   };
   recognition.onerror=()=>setStatus("Voice error");
-  recognition.onend=()=>{setStatus("Ready");translate()};
+  recognition.onend=()=>{
+    recognizing=false;
+    $("mic").classList.remove("recording");
+    setStatus("Ready");
+    translate();
+  };
   recognition.start();
 };
 
