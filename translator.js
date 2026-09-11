@@ -47,27 +47,13 @@ async function translate(){
   setBusy(true);
 
   try{
-    // Public demo endpoint. No secret/API key is stored in this GitHub version.
-    const body={
-      q:text,
-      source:source.value==="auto"?"auto":source.value,
-      target:target.value,
-      format:"text"
-    };
-    const r=await fetch("https://libretranslate.com/translate",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(body)
-    });
-    if(!r.ok) throw new Error("Provider unavailable");
-    const d=await r.json();
-
+    const result=await translateWithFallback(text,source.value,target.value);
     if(myId!==requestId) return; // a newer request has superseded this one
 
-    output.value=d.translatedText||"";
-    setStatus("Translated");
-    if(source.value==="auto" && d.detectedLanguage && d.detectedLanguage.language){
-      detected.textContent=`Detected: ${langName(d.detectedLanguage.language)}`;
+    output.value=result.translatedText||"";
+    setStatus(`Translated \u00b7 ${result.provider}`);
+    if(source.value==="auto" && result.detectedLanguage){
+      detected.textContent=`Detected: ${langName(result.detectedLanguage)}`;
     }else{
       detected.textContent=source.value==="auto"?"Auto detect":langName(source.value);
     }
@@ -77,6 +63,38 @@ async function translate(){
     setStatus("Service unavailable");
   }finally{
     if(myId===requestId) setBusy(false);
+  }
+}
+
+// Public, keyless demo endpoints. No secret/API key is stored in this GitHub version.
+async function translateViaGoogle(text,src,tgt){
+  const params=new URLSearchParams({client:"gtx",sl:src,tl:tgt,dt:"t",q:text});
+  const r=await fetch(`https://translate.googleapis.com/translate_a/single?${params.toString()}`);
+  if(!r.ok) throw new Error("google unavailable");
+  const d=await r.json();
+  const text_out=(d[0]||[]).map(seg=>seg[0]).join("");
+  if(!text_out) throw new Error("empty google result");
+  return {translatedText:text_out, detectedLanguage:d[2]||null, provider:"Google"};
+}
+
+async function translateViaMyMemory(text,src,tgt){
+  // MyMemory has no auto-detect and a ~500 byte per-request limit; used as a fallback only.
+  const safeSrc=src==="auto"?"en":src;
+  const chunk=text.slice(0,480);
+  const params=new URLSearchParams({q:chunk,langpair:`${safeSrc}|${tgt}`});
+  const r=await fetch(`https://api.mymemory.translated.net/get?${params.toString()}`);
+  if(!r.ok) throw new Error("mymemory unavailable");
+  const d=await r.json();
+  const text_out=d && d.responseData && d.responseData.translatedText;
+  if(!text_out) throw new Error("empty mymemory result");
+  return {translatedText:text_out, detectedLanguage:null, provider:"MyMemory"};
+}
+
+async function translateWithFallback(text,src,tgt){
+  try{
+    return await translateViaGoogle(text,src,tgt);
+  }catch(e){
+    return await translateViaMyMemory(text,src,tgt);
   }
 }
 
