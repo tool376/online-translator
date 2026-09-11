@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="CyberPortalHub multilingual real-time translator">
+  <title>Translator | CyberPortalHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo">C</span><div><b>CYBERPORTALHUB</b><small>Cyber Investigation • Security Tools</small></div></div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <p class="eyebrow">LANGUAGE TOOL</p>
+      <h1>AI-Ready Translator</h1>
+      <p class="sub">Fast multilingual translation with real-time typing, voice input and speech output.</p>
+    </div>
+    <span class="badge">GitHub Pages Edition</span>
+  </section>
+
+  <section class="toolbar card">
+    <select id="source"></select>
+    <button id="swap" class="iconbtn" title="Swap languages">⇄</button>
+    <select id="target"></select>
+    <label class="toggle"><input id="realtime" type="checkbox" checked><span></span> Real-time</label>
+  </section>
+
+  <section class="grid">
+    <div class="card panel">
+      <div class="panelhead"><span>Input</span><span id="detected">Auto detect</span></div>
+      <textarea id="input" maxlength="5000" placeholder="Type or speak text here..."></textarea>
+      <div class="actions">
+        <button id="mic" class="secondary">🎙 Voice</button>
+        <button id="clear" class="secondary">Clear</button>
+        <span id="count">0 / 5000</span>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <div class="panelhead"><span>Translation</span><span id="status">Ready</span></div>
+      <textarea id="output" readonly placeholder="Translation will appear here..."></textarea>
+      <div class="actions">
+        <button id="speak" class="secondary">🔊 Speak</button>
+        <button id="copy" class="secondary">Copy</button>
+        <button id="download" class="secondary">Download</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="notice card">
+    <b>GitHub Pages note</b>
+    <p>This public frontend is configured to use a demo translation provider. Do not place a Gemini/API secret in this repository. For production-quality Gemini translation, connect this UI to the secure Python backend.</p>
+  </section>
+</main>
+
+<footer>© CyberPortalHub • Independent reference & tools website</footer>
+<script src="translator.js"></script>
+</body>
+</html>
