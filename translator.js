@@ -147,7 +147,7 @@ $("speak").onclick=()=>{
   speechSynthesis.speak(new SpeechSynthesisUtterance(output.value));
 };
 
-let recognition=null, recognizing=false, baseText="", finalizedText="";
+let recognition=null, recognizing=false, manualStop=false, baseText="", finalizedText="";
 
 function buildLiveText(interim){
   let out=baseText;
@@ -156,23 +156,20 @@ function buildLiveText(interim){
   return out;
 }
 
-$("mic").onclick=()=>{
-  if(!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)){
-    alert("Voice input is not supported in this browser.");
-    return;
-  }
-  if(recognizing){
-    recognition.stop(); // user tapped again to stop manually
-    return;
-  }
+function appendFinalChunk(chunk){
+  const clean=chunk.trim();
+  if(!clean) return;
+  const tail=(finalizedText||baseText).trim().toLowerCase();
+  if(tail.endsWith(clean.toLowerCase())) return; // mobile mic often re-hears the tail end of the last word on restart \u2014 drop the repeat
+  finalizedText+=(finalizedText?" ":"")+clean;
+}
+
+function startRecognitionSession(){
   const R=window.SpeechRecognition||window.webkitSpeechRecognition;
   recognition=new R();
-  recognition.continuous=true;     // keep listening through pauses instead of stopping after one phrase
+  recognition.continuous=true;
   recognition.interimResults=true;
   recognition.lang=source.value==="auto"?"en-IN":source.value;
-
-  baseText=input.value.trim();     // preserve whatever was already there
-  finalizedText="";
 
   recognition.onstart=()=>{
     recognizing=true;
@@ -184,7 +181,7 @@ $("mic").onclick=()=>{
     for(let i=e.resultIndex;i<e.results.length;i++){
       const transcript=e.results[i][0].transcript;
       if(e.results[i].isFinal){
-        finalizedText+=(finalizedText?" ":"")+transcript.trim(); // keep confirmed speech, never overwrite it
+        appendFinalChunk(transcript);
       }else{
         interim+=transcript; // live preview of the phrase still being spoken
       }
@@ -193,14 +190,48 @@ $("mic").onclick=()=>{
     updateCount();
     schedule();
   };
-  recognition.onerror=()=>setStatus("Voice error");
+  recognition.onerror=e=>{
+    if(e.error==="not-allowed"||e.error==="service-not-allowed"){
+      manualStop=true; // mic permission blocked, don't keep retrying
+      setStatus("Voice permission blocked");
+    }
+    // other errors (no-speech, network blips) are handled by onend below
+  };
   recognition.onend=()=>{
-    recognizing=false;
-    $("mic").classList.remove("recording");
-    setStatus("Ready");
-    translate();
+    // fold whatever this session heard into the running base text before it's ever discarded
+    baseText=buildLiveText("");
+    finalizedText="";
+    if(manualStop){
+      recognizing=false;
+      $("mic").classList.remove("recording");
+      setStatus("Ready");
+      translate();
+    }else{
+      // mobile speech engines stop after every short pause even with continuous:true \u2014
+      // wait briefly so the mic fully releases, then restart transparently so it feels continuous
+      setTimeout(()=>{
+        if(manualStop) return;
+        try{ startRecognitionSession(); }catch(err){ setTimeout(startRecognitionSession,300); }
+      },300);
+    }
   };
   recognition.start();
+}
+
+$("mic").onclick=()=>{
+  if(!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)){
+    alert("Voice input is not supported in this browser.");
+    return;
+  }
+  if(recognizing){
+    manualStop=true;
+    recognition.stop(); // user tapped again to stop manually
+    return;
+  }
+  manualStop=false;
+  baseText=input.value.trim();   // preserve whatever was already there
+  finalizedText="";
+  startRecognitionSession();
 };
 
 updateCount();
